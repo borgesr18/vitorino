@@ -1,6 +1,7 @@
 # Simple web app to generate and send contract via email
 import os
 from flask import Flask, render_template, request
+from flask import Flask, render_template_string, request
 from docxtpl import DocxTemplate
 import smtplib
 from email.message import EmailMessage
@@ -25,6 +26,36 @@ load_env()
 
 app = Flask(__name__)
 
+
+app = Flask(__name__)
+
+FORM_HTML = """
+<!doctype html>
+<title>Gerar Contrato</title>
+<h1>Preencha os dados do contrato</h1>
+<form method=post>
+  <label>Nome completo:<input type=text name=Comprador required></label><br>
+  <label>CPF:<input type=text name=CPF required></label><br>
+  <label>RG:<input type=text name=RG required></label><br>
+  <label>Órgão emissor:<input type=text name=Emissor required></label><br>
+  <label>Estado civil:<input type=text name=EstadoCivil required></label><br>
+  <label>Profissão:<input type=text name=Profissao required></label><br>
+  <label>Endereço:<input type=text name=Endereco required></label><br>
+  <label>Número:<input type=text name=Numero required></label><br>
+  <label>Complemento:<input type=text name=Complemento></label><br>
+  <label>Bairro:<input type=text name=Bairro required></label><br>
+  <label>Cidade:<input type=text name=Cidade required></label><br>
+  <label>CEP:<input type=text name=CEP required></label><br>
+  <label>Quadra:<input type=text name=Quadra required></label><br>
+  <label>Lote:<input type=text name=Lote required></label><br>
+  <label>Testemunha 1:<input type=text name=Testemunha required></label><br>
+  <label>CPF Testemunha 1:<input type=text name=CPFTest required></label><br>
+  <label>Testemunha 2:<input type=text name=Testemunha2 required></label><br>
+  <label>CPF Testemunha 2:<input type=text name=CPFTest2 required></label><br>
+  <input type=submit value=Gerar>
+</form>
+{% if status %}<p>{{status}}</p>{% endif %}
+"""
 
 TEMPLATE_PATH = os.path.join(os.path.dirname(__file__), 'Contrato Vitorino.docx')
 RECIPIENT = os.environ.get('DEFAULT_RECIPIENT', 'rba1807@gmail.com')
@@ -64,6 +95,7 @@ def index():
         except Exception as e:
             status = f'Falha ao enviar: {e}'
     return render_template("form.html", status=status)
+    return render_template_string(FORM_HTML, status=status)
 
 def send_email(content: bytes, comprador: str):
     user = os.environ['EMAIL_USER']
@@ -77,6 +109,7 @@ def send_email(content: bytes, comprador: str):
     host = os.environ.get('SMTP_SERVER', 'smtp.gmail.com')
     port = int(os.environ.get('SMTP_PORT', '465'))
     with smtplib.SMTP_SSL(host, port) as smtp:
+    with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
         smtp.login(user, password)
         smtp.send_message(msg)
 
