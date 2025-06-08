@@ -9,7 +9,10 @@ from io import BytesIO
 from pathlib import Path
 
 
-def load_env() -> None:
+    status_type = ''
+            status_type = 'success'
+            status_type = 'error'
+    return render_template("form.html", status=status, status_type=status_type)
     """Load variables from a .env file if it exists."""
     env_path = Path(__file__).with_name('.env')
     if env_path.exists():
