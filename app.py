@@ -1,10 +1,31 @@
 # Simple web app to generate and send contract via email
 import os
+from flask import Flask, render_template, request
 from flask import Flask, render_template_string, request
 from docxtpl import DocxTemplate
 import smtplib
 from email.message import EmailMessage
 from io import BytesIO
+from pathlib import Path
+
+
+def load_env() -> None:
+    """Load variables from a .env file if it exists."""
+    env_path = Path(__file__).with_name('.env')
+    if env_path.exists():
+        with env_path.open() as f:
+            for line in f:
+                line = line.strip()
+                if not line or line.startswith('#') or '=' not in line:
+                    continue
+                key, val = line.split('=', 1)
+                os.environ.setdefault(key.strip(), val.strip())
+
+
+load_env()
+
+app = Flask(__name__)
+
 
 app = Flask(__name__)
 
@@ -73,6 +94,7 @@ def index():
             status = 'Contrato enviado com sucesso.'
         except Exception as e:
             status = f'Falha ao enviar: {e}'
+    return render_template("form.html", status=status)
     return render_template_string(FORM_HTML, status=status)
 
 def send_email(content: bytes, comprador: str):
@@ -84,6 +106,9 @@ def send_email(content: bytes, comprador: str):
     msg['To'] = RECIPIENT
     msg.set_content(f'Contrato gerado para {comprador}.')
     msg.add_attachment(content, maintype='application', subtype='vnd.openxmlformats-officedocument.wordprocessingml.document', filename='Contrato.docx')
+    host = os.environ.get('SMTP_SERVER', 'smtp.gmail.com')
+    port = int(os.environ.get('SMTP_PORT', '465'))
+    with smtplib.SMTP_SSL(host, port) as smtp:
     with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
         smtp.login(user, password)
         smtp.send_message(msg)

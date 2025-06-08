@@ -13,6 +13,7 @@ Aplicação simples em Flask para gerar contratos a partir de um modelo `.docx` 
    ```bash
    pip install -r requirements.txt
    ```
+2. Copie `.env.example` para `.env` e preencha `EMAIL_USER` e `EMAIL_PASS` com os dados de sua conta de e-mail. Opcionalmente ajuste `DEFAULT_RECIPIENT`, `SMTP_SERVER` e `SMTP_PORT`. O arquivo `.env` é carregado automaticamente pela aplicação.
 2. Copie `.env.example` para `.env` e preencha as variáveis `EMAIL_USER` e `EMAIL_PASS` com os dados de sua conta de e-mail. Opcionalmente altere `DEFAULT_RECIPIENT`.
 
 ## Uso
